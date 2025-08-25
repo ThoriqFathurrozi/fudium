@@ -9,6 +9,7 @@
 // @icon         https://miro.medium.com/v2/5d8de952517e8160e40ef9841c781cdc14a5db313057fa3c3de41c6f5b494b19
 // @grant        none
 // @run-at       document-end
+// @homepageURL  https://github.com/ThoriqFathurrozi/fudium
 // @updateURL    https://openuserjs.org/meta/frrzyriq/fudium.meta.js
 // @downloadURL  https://openuserjs.org/src/scripts/frrzyriq/fudium.user.js
 // @license      MIT; https://raw.githubusercontent.com/ThoriqFathurrozi/fudium/refs/heads/main/LICENSE
