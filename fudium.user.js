@@ -10,7 +10,7 @@
 // @grant        none
 // @run-at       document-end
 // @updateURL    https://openuserjs.org/meta/frrzyriq/fudium.meta.js
-// @downloadURL  https://raw.githubusercontent.com/ThoriqFathurrozi/fudium/refs/heads/main/fudium.user.js
+// @downloadURL  https://openuserjs.org/src/scripts/frrzyriq/fudium.user.js
 // @license      MIT; https://raw.githubusercontent.com/ThoriqFathurrozi/fudium/refs/heads/main/LICENSE
 // ==/UserScript==
 
