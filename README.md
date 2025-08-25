@@ -1,6 +1,6 @@
 # fudium
 
-Fudium is a lightweight Tampermonkey/Greasemonkey userscript that allows you to read Medium articles without being blocked by paywalls, overlays, or forced login popups. Stay distraction-free and focus on the content you want.
+Fudium is a lightweight Tampermonkey/Greasemonkey userscript that allows you to read Medium articles without being blocked by paywalls overlays. Stay distraction-free and focus on the content you want.
 
 ---
 

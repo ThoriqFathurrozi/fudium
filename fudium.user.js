@@ -2,7 +2,7 @@
 // @name         fudium
 // @namespace    http://tampermonkey.net/
 // @version      2025-08-21
-// @description  This is a userscript
+// @description  Tampermonkey/Greasemonkey script hack for Medium articles – zaps paywalls overlays nags so you can read without the noise. Not affiliated with Medium. Use at your own risk.
 // @author       frrzyriq
 // @match        https://medium.com
 // @match        https://*.medium.com/*
