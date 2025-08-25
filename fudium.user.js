@@ -11,7 +11,7 @@
 // @run-at       document-end
 // @updateURL    https://raw.githubusercontent.com/ThoriqFathurrozi/fudium/refs/heads/main/fudium.user.js
 // @downloadURL  https://raw.githubusercontent.com/ThoriqFathurrozi/fudium/refs/heads/main/fudium.user.js
-// @license      MIT
+// @license      MIT; https://raw.githubusercontent.com/ThoriqFathurrozi/fudium/refs/heads/main/LICENSE
 // ==/UserScript==
 
 await(async function () {
