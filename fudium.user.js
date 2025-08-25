@@ -9,6 +9,7 @@
 // @icon         https://miro.medium.com/v2/5d8de952517e8160e40ef9841c781cdc14a5db313057fa3c3de41c6f5b494b19
 // @grant        none
 // @run-at       document-end
+// @license      MIT
 // ==/UserScript==
 
 await(async function () {
