@@ -21,7 +21,6 @@ await(async function () {
     }
 
     function bannerTagArticle(link) {
-        console.log(link);
         const banner = document.createElement("a");
         banner.href = freedium + link
         banner.id = "fudium-article-banner";
@@ -38,7 +37,6 @@ await(async function () {
     }
 
     function bannerPageArticle(link) {
-        console.log(link)
         const banner = document.createElement("a");
         banner.href = freedium + link
         banner.id = "fudium-page-banner";
@@ -77,10 +75,12 @@ await(async function () {
     function initElement() {
         waitForElementWithMutationObserver('article', 10000)
             .then(element => {
-                console.log(element)
                 element.forEach((e) => {
                     const linkElement = e.querySelector('div[role="link"]');
-                    linkElement.append(bannerTagArticle(linkElement));
+                    if (linkElement && !linkElement.querySelector('#fudium-article-banner') && checkMemberArticle(linkElement)) {
+                        const rawLink = linkElement.dataset.href
+                        linkElement.append(bannerTagArticle(rawLink));
+                    }
                 });
             })
             .catch(error => {
