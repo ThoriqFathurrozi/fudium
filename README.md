@@ -26,10 +26,25 @@ Fudium is a lightweight Tampermonkey/Greasemonkey userscript that allows you to 
 
 ## 🚀 Installation
 
+### 🔹 Platform Installation
+
+1. Make sure you have a userscript manager installed (Tampermonkey, Violentmonkey, or Greasemonkey).
+2. Click the **Install Script** button from one of the supported platforms:
+   - [GreasyFork](https://greasyfork.org/en/scripts/547238-fudium)
+   - [OpenUserJS](https://openuserjs.org/scripts/frrzyriq/fudium)
+3. Confirm installation when prompted.
+4. Done! The script will now run automatically on Medium.
+
+---
+
+### 🔹 Manual Installation
+
 1. Install one of the userscript managers above.
-2. Create a new script and paste the fudium code.
-3. Save and enable it.
-4. Visit any Medium article and enjoy unrestricted reading!
+2. Click or open your extension’s.
+3. Create a new script.
+4. Copy and paste the script code into the editor.
+5. Save and enable it.
+6. Visit any member Medium article and enjoy unrestricted reading!
 
 ---
 
