@@ -106,7 +106,7 @@
         if (exceptPath.some(except => locationPath.includes(except))) return false;
 
         const pathParts = locationPath.split('/').filter(Boolean);
-        if (pathParts.length < 2) return false;
+        if (pathParts.length === 0) return false;
 
         const lastPart = pathParts[pathParts.length - 1];
         const possibleHash = lastPart.split('-').pop();
