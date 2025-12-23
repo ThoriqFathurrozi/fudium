@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         fudium
 // @namespace    https://github.com/ThoriqFathurrozi/
-// @version      1.1
+// @version      1.202512231766481536
 // @description  Tampermonkey/Greasemonkey script hack for Medium articles – zaps paywalls overlays nags so you can read without the noise. Not affiliated with Medium. Use at your own risk.
 // @author       frrzyriq
 // @match        https://medium.com
@@ -20,7 +20,8 @@
 (async () => {
     'use strict';
 
-    const FREEDIUM_URL = 'https://freedium.cfd/';
+    const FREEDIUM_URL = 'https://freedium.cfd/'; //Deprecated service
+    const PERISCOPE_URL = 'https://periscope.corsfix.com/?'
     const BANNER_ID_ARTICLE = 'fudium-article-banner';
     const BANNER_ID_PAGE = 'fudium-page-banner';
 
@@ -52,7 +53,7 @@
     // Create banner elements
     const createBanner = (link, isPageBanner = false) => {
         const banner = document.createElement('a');
-        banner.href = FREEDIUM_URL + link;
+        banner.href = PERISCOPE_URL + link;
         banner.id = isPageBanner ? BANNER_ID_PAGE : BANNER_ID_ARTICLE;
 
         Object.assign(banner.style, {
