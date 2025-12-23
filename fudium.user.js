@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         fudium
 // @namespace    https://github.com/ThoriqFathurrozi/
-// @version      1.202512231766481536
+// @version      1.202512231766489569
 // @description  Tampermonkey/Greasemonkey script hack for Medium articles – zaps paywalls overlays nags so you can read without the noise. Not affiliated with Medium. Use at your own risk.
 // @author       frrzyriq
 // @match        https://medium.com
@@ -14,19 +14,31 @@
 // @homepageURL  https://github.com/ThoriqFathurrozi/fudium
 // @updateURL    https://openuserjs.org/meta/frrzyriq/fudium.meta.js
 // @downloadURL  https://openuserjs.org/src/scripts/frrzyriq/fudium.user.js
+// @updateURL_DEV    http://127.0.0.1::7000/fudium.meta.js
+// @downloadURL_DEV  http://127.0.0.1::7000/fudium.user.js
 // @license      MIT; https://raw.githubusercontent.com/ThoriqFathurrozi/fudium/refs/heads/main/LICENSE
 // ==/UserScript==
 
 (async () => {
     'use strict';
+    const SERVICE_REGISTRY = Object.freeze({
+        FREEDIUM: { key: 'FREEDIUM', name: 'Fremedium', url: 'https://freedium.cfd/', deprecated: true, },
+        ARCHIVE: { key: 'ARCHIVE', name: 'Archive newest index', url: 'https://archive.is/newest/', deprecated: false, },
+        PERISCOPE: { key: 'PERISCOPE', name: 'periscope', url: 'https://periscope.corsfix.com/?', deprecated: false, },
+    });
 
-    const FREEDIUM_URL = 'https://freedium.cfd/'; //Deprecated service
-    const PERISCOPE_URL = 'https://periscope.corsfix.com/?'
+    const getActiveServices = () => {
+        return Object.values(SERVICE_REGISTRY).filter(
+            service => !service.deprecated
+        );
+    }
+
     const BANNER_ID_ARTICLE = 'fudium-article-banner';
     const BANNER_ID_PAGE = 'fudium-page-banner';
+    const POPUP_ID_SERVICE = 'fudium-service-popup';
 
     // Utility function to wait for elements
-    const waitForElement = async (selector, timeout = 5000, multiple = false) => {
+    const waitForElement = async ({ selector, timeout = 5000, multiple = false }) => {
         const queryMethod = multiple ? 'querySelectorAll' : 'querySelector';
         const existing = document[queryMethod](selector);
         if (multiple ? existing.length > 0 : existing) return existing;
@@ -51,9 +63,8 @@
     };
 
     // Create banner elements
-    const createBanner = (link, isPageBanner = false) => {
-        const banner = document.createElement('a');
-        banner.href = PERISCOPE_URL + link;
+    const createBanner = ({ isPageBanner = false, onClick }) => {
+        const banner = document.createElement('div');
         banner.id = isPageBanner ? BANNER_ID_PAGE : BANNER_ID_ARTICLE;
 
         Object.assign(banner.style, {
@@ -72,6 +83,7 @@
             )
         });
 
+
         banner.innerHTML = `
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="16" fill="white" style="vertical-align: middle; margin-right: 5px;">
                 <path d="M320 96c-35.3 0-64 28.7-64 64v64h192c35.3 0 64 28.7 64 64v224c0 35.3-28.7 64-64 64H192c-35.3 0-64-28.7-64-64V288c0-35.3 28.7-64 64-64v-64c0-70.7 57.3-128 128-128 63.5 0 116.1 46.1 126.2 106.7 2.9 17.4-8.8 33.9-26.3 36.9s-33.9-8.8-36.9-26.3c-5-30.2-31.3-53.3-63-53.3m40 328c13.3 0 24-10.7 24-24s-10.7-24-24-24h-80c-13.3 0-24 10.7-24 24s10.7 24 24 24z"/>
@@ -79,8 +91,119 @@
             Open Free
         `;
 
+        banner.addEventListener('click', onClick)
+
         return banner;
     };
+
+    function simpleHash(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            hash = ((hash << 5) - hash + str.charCodeAt(i)) | 0; // Bitwise operations constrain to a 32-bit integer
+        }
+        return hash;
+    }
+
+    const createPopUp = ({ id, children, closeOnOutside = true }) => {
+        const popup = document.createElement('div');
+        popup.id = `${POPUP_ID_SERVICE}-${id}`;
+
+        Object.assign(popup.style, {
+            position: 'absolute',
+            width: '100px',
+            top: '40px',
+            left: '0px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '5px',
+            padding: '10px',
+            borderRadius: '5px',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            textDecoration: 'none',
+            fontSize: '10px',
+            fontWeight: 'bold',
+            backdropFilter: 'blur(8px)',
+            zIndex: 9999,
+        });
+
+        const renderChildren = (children) => {
+            popup.innerHTML = '';
+
+            children.forEach(child => {
+                if (typeof child === 'function') {
+                    popup.appendChild(child());
+                } else if (child instanceof HTMLElement) {
+                    popup.appendChild(child);
+                } else {
+                    throw new Error('Child must be HTMLElement or function returning HTMLElement');
+                }
+            });
+        };
+
+        let removeOutsideListener = null;
+
+        const setupOutsideClick = () => {
+            if (!closeOnOutside) return;
+
+            const handler = (event) => {
+                if (!popup.contains(event.target)) {
+                    api.unmount();
+                }
+            };
+
+            document.addEventListener('pointerdown', handler, true);
+
+            removeOutsideListener = () => {
+                document.removeEventListener('pointerdown', handler, true);
+            };
+        };
+
+        renderChildren(children);
+
+        const api = {
+            element: popup,
+
+            mount(parent = document.body) {
+                parent.appendChild(popup);
+                setupOutsideClick();
+            },
+
+            unmount() {
+                removeOutsideListener?.();
+                popup.remove();
+            },
+
+            updateChildren(newChildren) {
+                renderChildren(newChildren);
+            },
+        };
+
+        return api;
+    };
+
+
+    const createLink = ({ linkArticle, serviceUrl, serviceName }) => {
+        const serviceLink = document.createElement('a');
+        serviceLink.href = serviceUrl + linkArticle
+        serviceLink.text = serviceName
+
+        Object.assign(serviceLink, {
+            padding: '2px',
+            textDecoration: 'none',
+            fontSize: '12px',
+            fontWeight: 'bold',
+        })
+
+        serviceLink.addEventListener('mouseover', () => {
+            serviceLink.style.backgroundColor = 'blue';
+        });
+
+        serviceLink.addEventListener('mouseout', () => {
+            serviceLink.style.backgroundColor = 'transparent';
+        });
+
+        return serviceLink
+    }
 
     // Check if article is member-only
     const isMemberOnlyArticle = async (element) => {
@@ -89,7 +212,7 @@
         }
 
         // Check for page-level paywall indicators
-        const paywallButton = await waitForElement('#paywallButton-programming', 2000);
+        const paywallButton = await waitForElement({ selector: '#paywallButton-programming', timeout: 2000 });
 
         if (!paywallButton) {
             return false;
@@ -118,7 +241,7 @@
     // Check if we're on Medium
     const isMediumSite = async () => {
         try {
-            const logo = await waitForElement('#wordmark-medium-desc', 2000);
+            const logo = await waitForElement({ selector: '#wordmark-medium-desc', timeout: 2000 });
             return logo !== null;
         } catch {
             return false;
@@ -128,7 +251,7 @@
     // Add banners to article cards
     const addArticleBanners = async () => {
         try {
-            const articles = await waitForElement('article', 4000, true);
+            const articles = await waitForElement({ selector: 'article', timeout: 4000, multiple: true });
 
             if (!articles.length) return;
 
@@ -138,7 +261,17 @@
 
                 if (await isMemberOnlyArticle(linkElement)) {
                     linkElement.style.position = 'relative';
-                    linkElement.appendChild(createBanner(linkElement.dataset.href));
+                    const urlArticle = linkElement.dataset.href
+                    const linkElements = getActiveServices().map((s) => {
+                        return createLink({ linkArticle: urlArticle, serviceUrl: s.url, serviceName: s.name })
+                    })
+
+                    const popup = createPopUp({ id: simpleHash(urlArticle), children: linkElements })
+                    const bannerOnClick = () => {
+                        popup.mount(banner)
+                    }
+                    const banner = createBanner({ onClick: bannerOnClick })
+                    linkElement.appendChild(banner);
                 }
             }
         } catch (error) {
@@ -153,10 +286,20 @@
         }
 
         try {
-            const heading = await waitForElement('h1', 4000);
+            const heading = await waitForElement({ selector: 'h1', timeout: 4000 });
             if (heading?.parentElement) {
                 heading.parentElement.style.position = 'relative';
-                heading.parentElement.appendChild(createBanner(window.location.href, true));
+                const urlArticle = window.location.href;
+                const linkElements = getActiveServices().map((s) => {
+                    return createLink({ linkArticle: urlArticle, serviceUrl: s.url, serviceName: s.name })
+                })
+
+                const popup = createPopUp({ id: simpleHash(urlArticle), children: linkElements })
+                const bannerOnClick = () => {
+                    popup.mount(banner)
+                }
+                const banner = createBanner({ onClick: bannerOnClick, isPageBanner: true })
+                heading.parentElement.appendChild(banner);
             }
         } catch (error) {
             console.error('Error adding page banner:', error);
