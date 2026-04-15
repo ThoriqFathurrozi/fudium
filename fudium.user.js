@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         fudium
 // @namespace    https://github.com/ThoriqFathurrozi/
-// @version      1.202604161776278415
+// @version      1.202604161776280911
 // @description  Tampermonkey/Greasemonkey script hack for Medium articles – zaps paywalls overlays nags so you can read without the noise. Not affiliated with Medium. Use at your own risk.
 // @author       frrzyriq
 // @match        https://medium.com
@@ -207,19 +207,26 @@
 
     // Check if article is member-only
     const isMemberOnlyArticle = async (element) => {
+        // find the page or article that member-only element
+        const memberPage = [...document.querySelectorAll('div>p')]
+            .some(p => p.innerText.includes('Member-only story'))
+
+
         if (element) {
-            return element.querySelector('button[aria-label="Member-only story"]') !== null;
+            const memberArticle = element.querySelector('button[aria-label="Member-only story"]');
+            return memberArticle !== null;
         }
 
         // Check for page-level paywall indicators
-        const paywallButton = await waitForElement({ selector: '#paywallButton-programming', timeout: 2000 });
+        const paywallButtonOne = await waitForElement({ selector: '#card-number', timeout: 2000 });
+        const paywallButtoTwo = await waitForElement({ selector: '#paywallButton-programming', timeout: 2000 });
 
-        if (!paywallButton) {
+        if (!(!paywallButtonOne ^ !paywallButtoTwo)) {
             return false;
         }
 
-        return [...document.querySelectorAll('div>p')]
-            .some(p => p.innerText.includes('Member-only story'));
+
+        return memberPage;
     };
 
     // Check if current page is an full article page
