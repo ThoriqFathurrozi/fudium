@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         fudium
 // @namespace    https://github.com/ThoriqFathurrozi/
-// @version      1.202512231766489569
+// @version      1.202604161776278415
 // @description  Tampermonkey/Greasemonkey script hack for Medium articles – zaps paywalls overlays nags so you can read without the noise. Not affiliated with Medium. Use at your own risk.
 // @author       frrzyriq
 // @match        https://medium.com
@@ -22,7 +22,7 @@
 (async () => {
     'use strict';
     const SERVICE_REGISTRY = Object.freeze({
-        FREEDIUM: { key: 'FREEDIUM', name: 'Fremedium', url: 'https://freedium.cfd/', deprecated: true, },
+        FREEDIUM: { key: 'FREEDIUM-MIRROR', name: 'Fremedium-Mirror', url: 'https://freedium-mirror.cfd/', deprecated: false, },
         ARCHIVE: { key: 'ARCHIVE', name: 'Archive newest index', url: 'https://archive.is/newest/', deprecated: false, },
         PERISCOPE: { key: 'PERISCOPE', name: 'periscope', url: 'https://periscope.corsfix.com/?', deprecated: false, },
     });
