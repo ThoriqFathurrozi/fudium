@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         fudium
 // @namespace    https://github.com/ThoriqFathurrozi/
-// @version      1.202604161776280911
+// @version      1.202604161776280919
 // @description  Tampermonkey/Greasemonkey script hack for Medium articles – zaps paywalls overlays nags so you can read without the noise. Not affiliated with Medium. Use at your own risk.
 // @author       frrzyriq
 // @match        https://medium.com
@@ -36,6 +36,16 @@
     const BANNER_ID_ARTICLE = 'fudium-article-banner';
     const BANNER_ID_PAGE = 'fudium-page-banner';
     const POPUP_ID_SERVICE = 'fudium-service-popup';
+
+    const ARTICLE_LINK_QUERY = 'a[data-discover="true"]';
+    const ARTICLE_MEMBER_QUERY = 'button[aria-label="Member-only story"]';
+
+    const ARTICLE_TEXT_INCLUDES_FILTER = 'Member-only story';
+
+    const EXECPT_PATH_ARTICLE = ['/@MediumStaff/list']
+
+    const MEDIUM_ARTICLE_QUERY = '#wordmark-medium-desc'
+    const MEDIUM_PAYWALL_BUTTON_QUERY = '#paywallButton-membershipOffer'
 
     // Utility function to wait for elements
     const waitForElement = async ({ selector, timeout = 5000, multiple = false }) => {
@@ -209,17 +219,17 @@
     const isMemberOnlyArticle = async (element) => {
         // find the page or article that member-only element
         const memberPage = [...document.querySelectorAll('div>p')]
-            .some(p => p.innerText.includes('Member-only story'))
+            .some(p => p.innerText.includes(ARTICLE_TEXT_INCLUDES_FILTER))
 
 
         if (element) {
-            const memberArticle = element.querySelector('button[aria-label="Member-only story"]');
+            const memberArticle = element.querySelector(ARTICLE_MEMBER_QUERY);
             return memberArticle !== null;
         }
 
         // Check for page-level paywall indicators
         const paywallButtonOne = await waitForElement({ selector: '#card-number', timeout: 2000 });
-        const paywallButtoTwo = await waitForElement({ selector: '#paywallButton-programming', timeout: 2000 });
+        const paywallButtoTwo = await waitForElement({ selector: MEDIUM_PAYWALL_BUTTON_QUERY, timeout: 2000 });
 
         if (!(!paywallButtonOne ^ !paywallButtoTwo)) {
             return false;
@@ -233,7 +243,7 @@
     const isFullArticlePage = () => {
         const locationPath = window.location.pathname;
 
-        const exceptPath = ['/@MediumStaff/list'];
+        const exceptPath = EXECPT_PATH_ARTICLE;
         if (exceptPath.some(except => locationPath.includes(except))) return false;
 
         const pathParts = locationPath.split('/').filter(Boolean);
@@ -248,7 +258,7 @@
     // Check if we're on Medium
     const isMediumSite = async () => {
         try {
-            const logo = await waitForElement({ selector: '#wordmark-medium-desc', timeout: 2000 });
+            const logo = await waitForElement({ selector: MEDIUM_ARTICLE_QUERY, timeout: 2000 });
             return logo !== null;
         } catch {
             return false;
@@ -263,7 +273,7 @@
             if (!articles.length) return;
 
             for (const article of articles) {
-                const linkElement = article.querySelector('div[role="link"]');
+                const linkElement = article.querySelector(ARTICLE_LINK_QUERY);
                 if (!linkElement || linkElement.querySelector(`#${BANNER_ID_ARTICLE}`)) continue;
 
                 if (await isMemberOnlyArticle(linkElement)) {
