@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         fudium
 // @namespace    https://github.com/ThoriqFathurrozi/
-// @version      1.202604161776280919
+// @version      1.202604161776280920
 // @description  Tampermonkey/Greasemonkey script hack for Medium articles – zaps paywalls overlays nags so you can read without the noise. Not affiliated with Medium. Use at your own risk.
 // @author       frrzyriq
 // @match        https://medium.com
@@ -82,7 +82,7 @@
             padding: '10px',
             borderRadius: '5px',
             color: 'white',
-            zIndex: '498',
+            zIndex: 9999999,
             backgroundColor: 'rgba(0, 0, 0, 0.5)',
             textDecoration: 'none',
             fontSize: '14px',
@@ -133,7 +133,7 @@
             fontSize: '10px',
             fontWeight: 'bold',
             backdropFilter: 'blur(8px)',
-            zIndex: 9999,
+            zIndex: 99999999,
         });
 
         const renderChildren = (children) => {
@@ -273,12 +273,12 @@
             if (!articles.length) return;
 
             for (const article of articles) {
-                const linkElement = article.querySelector(ARTICLE_LINK_QUERY);
-                if (!linkElement || linkElement.querySelector(`#${BANNER_ID_ARTICLE}`)) continue;
-
-                if (await isMemberOnlyArticle(linkElement)) {
-                    linkElement.style.position = 'relative';
-                    const urlArticle = linkElement.dataset.href
+                const linkElement = article.querySelectorAll(ARTICLE_LINK_QUERY)[1];
+                if (!linkElement || article.querySelector(`#${BANNER_ID_ARTICLE}`)) continue;
+                const isMember = await isMemberOnlyArticle(article)
+                if (isMember) {
+                    article.style.setProperty('position', 'relative', 'important')
+                    const urlArticle = linkElement.href
                     const linkElements = getActiveServices().map((s) => {
                         return createLink({ linkArticle: urlArticle, serviceUrl: s.url, serviceName: s.name })
                     })
@@ -288,7 +288,7 @@
                         popup.mount(banner)
                     }
                     const banner = createBanner({ onClick: bannerOnClick })
-                    linkElement.appendChild(banner);
+                    article.appendChild(banner);
                 }
             }
         } catch (error) {
